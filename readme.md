@@ -85,3 +85,16 @@ struct hostent {
     - nc <ip_address> <port>
     - echo "<message>" | nc <ip_address> <port>
 - arp -a : get the routing table of a machine
+
+### ARP WORKING PROTOCOL
+
+**Il permet de transcrire l'addresse IP vers l'addresse MAC pendant la communication**
+
+- Il permet de trouver l'addresse MAC a partir de l'addresse IP afin d'etablir une communication entre les machines.
+    Par exmple dans notre cas quand on veut faire l'attaque du man in the midddle. L'addresse source va envoyer un un broadcast avec l'addresse IP souhaite et en utilisant l'addresse MAC de broadcast comme : FF:FF:FF:FF:FF:FF. Ceci s'appelle une **ARP Request**. Nous allons intercepter cette requete car nous connaissons l'addresse IP destination et affilier cette addresse ip qui n'est pas la notre a notre addresse MAC. Comme ca tous les futurs paquets allant vers l'addresse IP destination passeront par notre machine.
+**Reverse ARP**
+    Envoie d'un paquet en broadcast sur le LAN pour les nouvelles machines presentes sur le reseau. Ce paquet contiendra son address MAC et celle de la target.
+**Proxy ARP**
+    Permet de travailler avec des sous-reseaux
+**Inverse ARP**
+    Il utilise l'addresse MAC pour trouver l'addresse IP.
