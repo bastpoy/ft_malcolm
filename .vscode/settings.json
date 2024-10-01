@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.ejs": "html",
-        "errno.h": "c"
+        "errno.h": "c",
+        "ethernet.h": "c"
     }
 }

@@ -85,7 +85,7 @@ struct hostent {
     - nc <ip_address> <port>
     - echo "<message>" | nc <ip_address> <port>
 - arp -a : get the routing table of a machine
-
+- sudo arp -d <ip_address> : remove an address from my arp table
 ### ARP WORKING PROTOCOL
 
 **Il permet de transcrire l'addresse IP vers l'addresse MAC pendant la communication**
