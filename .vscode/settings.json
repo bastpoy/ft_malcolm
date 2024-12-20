@@ -2,6 +2,8 @@
     "files.associations": {
         "*.ejs": "html",
         "errno.h": "c",
-        "ethernet.h": "c"
+        "ethernet.h": "c",
+        "if_packet.h": "c",
+        "if_arp.h": "c"
     }
 }

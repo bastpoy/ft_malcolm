@@ -69,6 +69,37 @@ struct hostent {
    char   **h_addr_list;  /* Liste d'adresses.         */
 }
 
+//MAC ADDRESS STRUCTURE
+struct sockaddr_ll {
+    unsigned short sll_family;   /* Toujours AF_PACKET        */
+    unsigned short sll_protocol; /* Protocole niveau physique */
+    int            sll_ifindex;  /* Numéro d'interface        */
+    unsigned short sll_hatype;   /* Type d'entête             */
+    unsigned char  sll_pkttype;  /* Type de paquet            */
+    unsigned char  sll_halen;    /* Longueur de l'adresse     */
+    unsigned char  sll_addr[8];  /* Adresse niveau physique   */
+};
+
+//struct for getting the dest and source mac from a packet
+//representing the ethernet header before the arp header
+struct ethhdr {
+    unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */
+    unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */
+    __be16        h_proto;              /* Ethernet protocol type/length */
+};
+
+//ARP packet structure
+struct arp_packet {
+    struct arphdr hdr;
+    unsigned char sender_mac[6];
+    unsigned char sender_ip[4];
+    unsigned char target_mac[6];
+    unsigned char target_ip[4];
+};
+
+
+![alt text](image.png)
+
 ## NETWORK NOTIONS
 
 ### Network specifications
@@ -81,11 +112,14 @@ struct hostent {
 
 ### Bash command to communicate
 
-- nc : listen and connection with TCP and UDP (netcat)
-    - nc <ip_address> <port>
-    - echo "<message>" | nc <ip_address> <port>
-- arp -a : get the routing table of a machine
-- sudo arp -d <ip_address> : remove an address from my arp table
+- **nc** : listen and connection with TCP and UDP (netcat)
+    - **nc <ip_address> <port>**
+    - **echo "<message>" | nc <ip_address> <port>**
+- **arp -a** : get the routing table of a machine
+- **sudo arp -d <ip_address>** : remove an address from my arp table
+- **sudo arping -I enp0s3 192.168.0.51** : envoie une requete arp a l'addresse IP
+- **ip neigh show** : voir la table de routage
+- **sudo arp-scan --localnet --numeric --quiet --ignoredups** : scanner les ip connectes au reseau
 ### ARP WORKING PROTOCOL
 
 **Il permet de transcrire l'addresse IP vers l'addresse MAC pendant la communication**

@@ -2,17 +2,23 @@
 #define MALCOLM_H
 
 #include "libft.h"
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <net/if.h>
+#include <net/ethernet.h>
 #include <netinet/ip.h>
-#include <string.h>
+#include <netinet/if_ether.h>
 #include <errno.h>
-#include <stdio.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
-#include <net/ethernet.h>
+// #include <linux/if_arp.h>
+
+
 
 #define PORT 219
 
@@ -31,5 +37,7 @@ struct arp_header {
 // sizeof ethhdr 14 bytes => total 42 bytes
 
 int fill_addr(struct sockaddr_in *targetaddr, char *addr);
+void print_uchar(unsigned char *array);
+void print_mac(unsigned char *mac);
 
 #endif

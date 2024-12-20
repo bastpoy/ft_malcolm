@@ -1,7 +1,7 @@
-SRCSPRINTF = malcolm.c
+SRCSPRINTF = malcolm.c utils.c
 OBJSPRINTF = $(patsubst %.c, objects/%.o, $(SRCSPRINTF))
 
-CFLAGS = -Wall -Werror -Wextra -g3 -Ilibft
+CFLAGS = -Wall -Wextra -g3 -Ilibft
 
 NAME = ft_malcolm
 
