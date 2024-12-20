@@ -84,9 +84,9 @@ struct sockaddr_ll {
 //representing the ethernet header before the arp header
 
 struct ethhdr {
-    unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */< br/>
-    unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */< br/>
-    __be16        h_proto;              /* Ethernet protocol type/length */< br/>
+    unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */<br />
+    unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */<br />
+    __be16        h_proto;              /* Ethernet protocol type/length */<br />
 };
 
 //ARP packet structure
