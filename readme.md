@@ -38,64 +38,59 @@ There is a program who will listen for incoming request on the broadcast by the 
 
 ## STRUCTURES
 
-typedef int SOCKET;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
-typedef struct in_addr IN_ADDR;
-
-struct sockaddr_in {
-   uint8_t         sin_len;       /* longueur totale      */
-   sa_family_t     sin_family;    /* famille : AF_INET     */
-   in_port_t       sin_port;      /* le numéro de port    */
-   struct in_addr  sin_addr;      /* l'adresse internet   */
-   unsigned char   sin_zero[8];   /* un champ de 8 zéros  */
+struct sockaddr_in {<br />
+- uint8_t         sin_len;       /* longueur totale      */
+- sa_family_t     sin_family;    /* famille : AF_INET     */
+- in_port_t       sin_port;      /* le numéro de port    */
+- struct in_addr  sin_addr;      /* l'adresse internet   */
+- unsigned char   sin_zero[8];   /* un champ de 8 zéros  */
 };
 
-struct sockaddr {
-   unsigned char   sa_len;         /* longueur totale         */
-   sa_family_t     sa_family;      /* famille d'adresse     */
-   char            sa_data[14];    /* valeur de l'adresse    */
+struct sockaddr {<br />
+- unsigned char   sa_len;         /* longueur totale         */
+- sa_family_t     sa_family;      /* famille d'adresse     */
+- char            sa_data[14];    /* valeur de l'adresse    */
 };
 
-struct in_addr {
-   in_addr_t    s_addr;
+struct in_addr {<br />
+- in_addr_t    s_addr;
 };
 
-struct hostent {
-   char    *h_name;       /* Nom officiel de l'hôte.   */
-   char   **h_aliases;    /* Liste d'alias.            */
-   int      h_addrtype;   /* Type d'adresse de l'hôte. */
-   int      h_length;     /* Longueur de l'adresse.    */
-   char   **h_addr_list;  /* Liste d'adresses.         */
+struct hostent {<br />
+- char    *h_name;       /* Nom officiel de l'hôte.   */
+- char   **h_aliases;    /* Liste d'alias.            */
+- int      h_addrtype;   /* Type d'adresse de l'hôte. */
+- int      h_length;     /* Longueur de l'adresse.    */
+- char   **h_addr_list;  /* Liste d'adresses.         */
 }
 
-//MAC ADDRESS STRUCTURE
-struct sockaddr_ll {
-    unsigned short sll_family;   /* Toujours AF_PACKET        */
-    unsigned short sll_protocol; /* Protocole niveau physique */
-    int            sll_ifindex;  /* Numéro d'interface        */
-    unsigned short sll_hatype;   /* Type d'entête             */
-    unsigned char  sll_pkttype;  /* Type de paquet            */
-    unsigned char  sll_halen;    /* Longueur de l'adresse     */
-    unsigned char  sll_addr[8];  /* Adresse niveau physique   */
+//MAC ADDRESS STRUCTURE<br />
+struct sockaddr_ll {<br />
+- unsigned short sll_family;   /* Toujours AF_PACKET        */
+- unsigned short sll_protocol; /* Protocole niveau physique */
+- int            sll_ifindex;  /* Numéro d'interface        */
+- unsigned short sll_hatype;   /* Type d'entête             */
+- unsigned char  sll_pkttype;  /* Type de paquet            */
+- unsigned char  sll_halen;    /* Longueur de l'adresse     */
+- unsigned char  sll_addr[8];  /* Adresse niveau physique   */
 };
 
-//struct for getting the dest and source mac from a packet
-//representing the ethernet header before the arp header
+//struct for getting the dest and source mac from a packet<br />
+//representing the ethernet header before the arp header<br /><br />
 
-struct ethhdr {
-    unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */<br />
-    unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */<br />
-    __be16        h_proto;              /* Ethernet protocol type/length */<br />
+struct ethhdr {<br />
+- unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */
+- unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */
+- __be16        h_proto;              /* Ethernet protocol type/length */
 };
 
-//ARP packet structure
-struct arp_packet {
-    struct arphdr hdr;
-    unsigned char sender_mac[6];
-    unsigned char sender_ip[4];
-    unsigned char target_mac[6];
-    unsigned char target_ip[4];
+//ARP packet structure<br /><br />
+struct arp_packet {<br />
+- struct arphdr hdr;
+- unsigned char sender_mac[6];
+- unsigned char sender_ip[4];
+- unsigned char target_mac[6];
+- unsigned char target_ip[4];
 };
 
 
