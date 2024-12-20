@@ -39,17 +39,17 @@ There is a program who will listen for incoming request on the broadcast by the 
 ## STRUCTURES
 
 struct sockaddr_in {<br />
-- uint8_t         sin_len;       /* longueur totale      */
-- sa_family_t     sin_family;    /* famille : AF_INET     */
-- in_port_t       sin_port;      /* le numéro de port    */
-- struct in_addr  sin_addr;      /* l'adresse internet   */
-- unsigned char   sin_zero[8];   /* un champ de 8 zéros  */
+- uint8_t         sin_len;       &nbsp;/* longueur totale      */
+- sa_family_t     sin_family;    &nbsp;/* famille : AF_INET     */
+- in_port_t       sin_port;      &nbsp;/* le numéro de port    */
+- struct in_addr  sin_addr;      &nbsp;/* l'adresse internet   */
+- unsigned char   sin_zero[8];   &nbsp;/* un champ de 8 zéros  */
 };
 
 struct sockaddr {<br />
-- unsigned char   sa_len;         /* longueur totale         */
-- sa_family_t     sa_family;      /* famille d'adresse     */
-- char            sa_data[14];    /* valeur de l'adresse    */
+- unsigned char   sa_len;         &nbsp;/* longueur totale         */
+- sa_family_t     sa_family;      &nbsp;/* famille d'adresse     */
+- char            sa_data[14];    &nbsp;/* valeur de l'adresse    */
 };
 
 struct in_addr {<br />
@@ -57,30 +57,30 @@ struct in_addr {<br />
 };
 
 struct hostent {<br />
-- char    *h_name;       /* Nom officiel de l'hôte.   */
-- char   **h_aliases;    /* Liste d'alias.            */
-- int      h_addrtype;   /* Type d'adresse de l'hôte. */
-- int      h_length;     /* Longueur de l'adresse.    */
-- char   **h_addr_list;  /* Liste d'adresses.         */
+- char    *h_name;       &nbsp;/Nom officiel de l'hôte.   */
+- char   **h_aliases;    &nbsp;/ Liste d'alias.            */
+- int      h_addrtype;   &nbsp;/* Type d'adresse de l'hôte. */
+- int      h_length;     &nbsp;/* Longueur de l'adresse.    */
+- char   **h_addr_list;  &nbsp;/ Liste d'adresses.         */
 }
 
 **MAC ADDRESS STRUCTURE<br />**
 struct sockaddr_ll {<br />
-- unsigned short sll_family;   /* Toujours AF_PACKET        */
-- unsigned short sll_protocol; /* Protocole niveau physique */
-- int            sll_ifindex;  /* Numéro d'interface        */
-- unsigned short sll_hatype;   /* Type d'entête             */
-- unsigned char  sll_pkttype;  /* Type de paquet            */
-- unsigned char  sll_halen;    /* Longueur de l'adresse     */
-- unsigned char  sll_addr[8];  /* Adresse niveau physique   */
+- unsigned short sll_family;   &nbsp;/* Toujours AF_PACKET        */
+- unsigned short sll_protocol; &nbsp;/* Protocole niveau physique */
+- int            sll_ifindex;  &nbsp;/* Numéro d'interface        */
+- unsigned short sll_hatype;   &nbsp;/* Type d'entête             */
+- unsigned char  sll_pkttype;  &nbsp;/* Type de paquet            */
+- unsigned char  sll_halen;    &nbsp;/* Longueur de l'adresse     */
+- unsigned char  sll_addr[8];  &nbsp;/* Adresse niveau physique   */
 };
 
 **struct for getting the dest and source mac from a packet<br />**
 **representing the ethernet header before the arp header<br />**
 struct ethhdr {<br />
-- unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */
-- unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */
-- __be16        h_proto;              /* Ethernet protocol type/length */
+- unsigned char h_dest[ETH_ALEN];     &nbsp;/* Destination MAC address (6 bytes) */
+- unsigned char h_source[ETH_ALEN];   &nbsp;/* Source MAC address (6 bytes) */
+- __be16        h_proto;              &nbsp;/* Ethernet protocol type/length */
 };
 
 **ARP packet structure<br />**
