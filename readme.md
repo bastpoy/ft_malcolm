@@ -64,7 +64,7 @@ struct hostent {<br />
 - char   **h_addr_list;  /* Liste d'adresses.         */
 }
 
-//MAC ADDRESS STRUCTURE<br />
+**MAC ADDRESS STRUCTURE<br />**
 struct sockaddr_ll {<br />
 - unsigned short sll_family;   /* Toujours AF_PACKET        */
 - unsigned short sll_protocol; /* Protocole niveau physique */
@@ -75,16 +75,15 @@ struct sockaddr_ll {<br />
 - unsigned char  sll_addr[8];  /* Adresse niveau physique   */
 };
 
-//struct for getting the dest and source mac from a packet<br />
-//representing the ethernet header before the arp header<br /><br />
-
+**struct for getting the dest and source mac from a packet<br />**
+**representing the ethernet header before the arp header<br />**
 struct ethhdr {<br />
 - unsigned char h_dest[ETH_ALEN];     /* Destination MAC address (6 bytes) */
 - unsigned char h_source[ETH_ALEN];   /* Source MAC address (6 bytes) */
 - __be16        h_proto;              /* Ethernet protocol type/length */
 };
 
-//ARP packet structure<br /><br />
+**ARP packet structure<br />**
 struct arp_packet {<br />
 - struct arphdr hdr;
 - unsigned char sender_mac[6];
