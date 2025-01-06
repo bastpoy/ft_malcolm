@@ -20,6 +20,8 @@ There is a program who will listen for incoming request on the broadcast by the 
     - le type de communication (TCP, UDP)
     - protocole : un protocole specifique a mettre en oeuvre (peut ne pas en avoir)
 - setsocketopt(): permet de specifier des options liees au fd du socket
+- inet_ntop = inet_ntoa => ntop plus recente; => convertion binary to string
+- inet_pton => convertion string to binary
 - if_nametoindex(): permet de recuperer l'index d'une interface reseau grace a son index
     - elle retourne donc un index
     - elle prend en parametre une chaine de caractere correspondant au nom de l'interface
@@ -38,7 +40,18 @@ There is a program who will listen for incoming request on the broadcast by the 
 
 ## STRUCTURES
 
-struct sockaddr_in {<br />
+**physical-layer address<br />**
+struct sockaddr_ll {
+- unsigned short sll_family;   /* Always AF_PACKET */
+- unsigned short sll_protocol; /* Physical-layer protocol */
+- int            sll_ifindex;  /* Interface number */
+- unsigned short sll_hatype;   /* ARP hardware type */
+- unsigned char  sll_pkttype;  /* Packet type */
+- unsigned char  sll_halen;    /* Length of address */
+- unsigned char  sll_addr[8];  /* Physical-layer address */
+};
+
+struct sockaddr_in {
 - uint8_t         sin_len;       &nbsp;/* longueur totale      */
 - sa_family_t     sin_family;    &nbsp;/* famille : AF_INET     */
 - in_port_t       sin_port;      &nbsp;/* le numéro de port    */
@@ -46,17 +59,17 @@ struct sockaddr_in {<br />
 - unsigned char   sin_zero[8];   &nbsp;/* un champ de 8 zéros  */
 };
 
-struct sockaddr {<br />
+struct sockaddr {
 - unsigned char   sa_len;         &nbsp;/* longueur totale         */
 - sa_family_t     sa_family;      &nbsp;/* famille d'adresse     */
 - char            sa_data[14];    &nbsp;/* valeur de l'adresse    */
 };
 
-struct in_addr {<br />
+struct in_addr {
 - in_addr_t    s_addr;
 };
 
-struct hostent {<br />
+struct hostent {
 - char    *h_name;       &nbsp;/Nom officiel de l'hôte.   */
 - char   **h_aliases;    &nbsp;/ Liste d'alias.            */
 - int      h_addrtype;   &nbsp;/* Type d'adresse de l'hôte. */
@@ -65,7 +78,7 @@ struct hostent {<br />
 }
 
 **MAC ADDRESS STRUCTURE<br />**
-struct sockaddr_ll {<br />
+struct sockaddr_ll {
 - unsigned short sll_family;   &nbsp;/* Toujours AF_PACKET        */
 - unsigned short sll_protocol; &nbsp;/* Protocole niveau physique */
 - int            sll_ifindex;  &nbsp;/* Numéro d'interface        */
@@ -84,7 +97,7 @@ struct ethhdr {<br />
 };
 
 **ARP packet structure<br />**
-struct arp_packet {<br />
+struct arp_packet {
 - struct arphdr hdr;
 - unsigned char sender_mac[6];
 - unsigned char sender_ip[4];
@@ -115,6 +128,9 @@ struct arp_packet {<br />
 - **sudo arping -I enp0s3 192.168.0.51** : envoie une requete arp a l'addresse IP
 - **ip neigh show** : voir la table de routage
 - **sudo arp-scan --localnet --numeric --quiet --ignoredups** : scanner les ip connectes au reseau
+- sudo tcpdump -i enp0s3 host 192.168.0.100 => listen on the host with his actual IP address.
+- sudo arping -I enp0s3 192.168.0.22
+
 ### ARP WORKING PROTOCOL
 
 **Il permet de transcrire l'addresse IP vers l'addresse MAC pendant la communication**
@@ -127,3 +143,19 @@ struct arp_packet {<br />
     Permet de travailler avec des sous-reseaux
 **Inverse ARP**
     Il utilise l'addresse MAC pour trouver l'addresse IP.
+
+**ARP PACKET**
+- Contain an ethernet header which is 14 bytes.
+- 
+
+**REPRESENTATION OF AN IP ADDRESS**
+- string => "192.0.0.2"
+	- human readable
+- unsigned char[4] => {0xC0, 0xA8, 0x01, 0x01}
+	- raw bits / binary (network)
+- struct in_addr (uint32) => 0xC0A80101
+	- internal representation
+
+**PROBLEMS**
+- ARP request packets receive two times
+- no response available on Wireshark when i dont spy / and a request but no response on wireshark when i spy.

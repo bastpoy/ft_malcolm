@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
+#include <stdbool.h>
 // #include <linux/if_arp.h>
 
 

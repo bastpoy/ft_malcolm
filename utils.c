@@ -12,7 +12,7 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
     //convert my input ip address ip to binary 
     if(!(rval = inet_pton(AF_INET, addr, &inAddress->sin_addr.s_addr)))
     {
-        printf("invalide address: %s\n", addr);
+        printf("invalide IP address: %s\n", addr);
         return(1);
     }
     else if(rval == -1)
@@ -22,7 +22,7 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
     }
     //convert the initial address to print it
     inet_ntop(AF_INET, &inAddress->sin_addr, buffer, sizeof(buffer));
-    printf("Addresse source %s\n", buffer);
+    printf("Address %s\n", buffer);
 
     ft_memset(&(inAddress->sin_zero), '\0', 8);
     return(0);

@@ -1,15 +1,23 @@
 #include "malcolm.h"
 
+void print_buffer(unsigned char *buffer, ssize_t length) {
+    for (ssize_t i = 0; i < length; i++) {
+        printf("%02x-", buffer[i]);
+    }
+    printf("\n");
+}
+
 int main(int argc, char *argv[]) 
 {
     (void) argc;
     struct sockaddr_in srcaddr, targetaddr;
     struct sockaddr_in *target;
-    struct ifaddrs *ifaddr, *ifa ;
+    struct ifaddrs *ifaddr, *ifa;
     struct sockaddr_ll *s;
-    char buffer[65536];
+    char buffer[1024];
     int sockfd;
     int index_interface;
+    bool arprequest = false;
     
     // SOCK_RAW for direct packet manipulation
     sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
@@ -71,29 +79,44 @@ int main(int argc, char *argv[])
         }
 
         // cast the buffer from the actual packet into an eth structure
-        //eth struct contain both source and dest MAC adress
+        // eth struct contain both source and dest MAC adress => ethernet header
         struct ethhdr *eth = (struct ethhdr *)buffer;
         //check if its an ARP packet
         if(ntohs(eth->h_proto) == ETH_P_ARP) 
         {
+            //create an arp_header skipping the ethernet header
             struct  arp_header *arp = (struct arp_header *)(buffer + sizeof(struct ethhdr));
-            unsigned int uintsrc = (arp->sender_ip[3] << 24) | (arp->sender_ip[2] << 16) | (arp->sender_ip[1] << 8) | arp->sender_ip[0];
-            unsigned int uinttarg = (arp->target_ip[3] << 24) | (arp->target_ip[2] << 16) | (arp->target_ip[1] << 8) | arp->target_ip[0];
 
+            unsigned int uintsrc, uinttarg;
+            // put the content of sender and target ip in an unsigned int
+            //convert an unsigned char to unsigned int
+            ft_memcpy(&uintsrc, arp->sender_ip, 4);
+            ft_memcpy(&uinttarg, arp->target_ip, 4);
+
+            // printf("src %d\t %d ||| targ %d\t %d\n", uintsrc, srcaddr.sin_addr.s_addr, uinttarg, targetaddr.sin_addr.s_addr);
+            
             if(uintsrc == srcaddr.sin_addr.s_addr && uinttarg == targetaddr.sin_addr.s_addr) // detection de l'addresse ip source et dest corresponsant aux argv
             {
+                // // Receiving packet
+                // printf("actual packet sending\n");
+                // printf("ARP packet received:\n");
+                // printf("  Source MAC: ");
+                // print_mac(eth->h_source);
+                // printf("  Dest MAC: ");
+                // print_mac(eth->h_dest);
+                // printf("  Sender IP: %d.%d.%d.%d\n", arp->sender_ip[0], arp->sender_ip[1], arp->sender_ip[2], arp->sender_ip[3]);
+                // printf("  Target IP: %d.%d.%d.%d\n", arp->target_ip[0], arp->target_ip[1], arp->target_ip[2], arp->target_ip[3]);
                 if(eth->h_dest[0] == 0xFF && eth->h_dest[1] == 0xFF && eth->h_dest[2] == 0xFF &&
-                    eth->h_dest[3] == 0xFF && eth->h_dest[4] == 0xFF && eth->h_dest[5] == 0xFF)
+                    eth->h_dest[3] == 0xFF && eth->h_dest[4] == 0xFF && eth->h_dest[5] == 0xFF && !arprequest)
                 {
-                    // Receiving packet
-                    printf("ARP packet received:\n");
-                    printf("  Source MAC: ");
-                    print_mac(eth->h_source);
-                    printf("  Dest MAC: ");
-                    print_mac(eth->h_dest);
-                    printf("  Sender IP: %d.%d.%d.%d\n", arp->sender_ip[0], arp->sender_ip[1], arp->sender_ip[2], arp->sender_ip[3]);
-                    printf("  Target IP: %d.%d.%d.%d\n", arp->target_ip[0], arp->target_ip[1], arp->target_ip[2], arp->target_ip[3]);
-                    
+                    printf("size: %ld\n", packet_len);
+                    arprequest = true;
+                    // print_buffer((unsigned char *)buffer, sizeof(packet_len));
+                    for(int i = 0; i < packet_len ; i++)
+                    {
+                        printf("%x-", buffer[i]);
+                    }
+                    printf("\n\n");
                     // sending packet
                     unsigned char buffersend[42];
                     struct ethhdr *ethsend = (struct ethhdr *)buffersend;
@@ -102,9 +125,9 @@ int main(int argc, char *argv[])
 
                     //eth header
                     ethsend->h_proto = htons(ETH_P_ARP); // PROTOCOLE ARP
-                    ft_memcpy(ethsend->h_dest, eth->h_source, ETH_ALEN); // MAC dest
-                    ft_memcpy(ethsend->h_source, s->sll_addr, ETH_ALEN); // MAC source
-                    
+                    ft_memcpy(ethsend->h_dest, eth->h_source, ETH_ALEN); // MAC dest which is the mac src of the previous request
+                    ft_memcpy(ethsend->h_source, s->sll_addr, ETH_ALEN); // MAC source which is my MAC address
+
                     //arp header
                     printf("\n-------RESPONSE--------\n");
                     arpsend->hardware_type = htons(1);
@@ -133,9 +156,19 @@ int main(int argc, char *argv[])
                     
                     int size = sendto(sockfd, buffersend, 42, 0, (struct sockaddr *)&address_response, sizeof(address_response));
                     if(size < 0)
+                    {
                         return(printf("Error sending packet: %s\n", strerror(errno)), 1);
+                    }
                     else
+                    {
                         printf("****SUCCESS REPLY: %d bytes****\n\n", size);
+                        for(int i = 0; i < 42; i++)
+                        {
+                            printf("%x-", buffersend[i]);
+                        }
+                        // print_buffer((unsigned char *)buffersend, 42);
+                        printf("\n\n");
+                    }
                 }
             }
         }
@@ -144,59 +177,3 @@ int main(int argc, char *argv[])
     freeifaddrs(ifaddr);
     return(0);
 }
-
-// int send_arp(int fd, int ifindex, const unsigned char *src_mac, uint32_t src_ip, uint32_t dst_ip)
-// {
-//     int err = -1;
-//     unsigned char buffer[BUF_SIZE];
-//     memset(buffer, 0, sizeof(buffer));
-
-    // struct sockaddr_ll socket_address;
-//     socket_address.sll_family = AF_PACKET;
-//     socket_address.sll_protocol = htons(ETH_P_ARP);
-//     socket_address.sll_ifindex = ifindex;
-    // socket_address.sll_hatype = htons(ARPHRD_ETHER);
-//     socket_address.sll_pkttype = (PACKET_BROADCAST);
-//     socket_address.sll_halen = MAC_LENGTH;
-//     socket_address.sll_addr[6] = 0x00;
-//     socket_address.sll_addr[7] = 0x00;
-
-//     struct ethhdr *send_req = (struct ethhdr *) buffer;
-//     struct arp_header *arp_req = (struct arp_header *) (buffer + ETH2_HEADER_LEN);
-//     int index;
-//     ssize_t ret, length = 0;
-
-//     //Broadcast
-//     memset(send_req->h_dest, 0xff, MAC_LENGTH);
-
-//     //Target MAC zero
-//     memset(arp_req->target_mac, 0x00, MAC_LENGTH);
-
-//     //Set source mac to our MAC address
-//     memcpy(send_req->h_source, src_mac, MAC_LENGTH);
-//     memcpy(arp_req->sender_mac, src_mac, MAC_LENGTH);
-//     memcpy(socket_address.sll_addr, src_mac, MAC_LENGTH);
-
-//     /* Setting protocol of the packet */
-//     send_req->h_proto = htons(ETH_P_ARP);
-
-//     /* Creating ARP request */
-//     arp_req->hardware_type = htons(HW_TYPE);
-//     arp_req->protocol_type = htons(ETH_P_IP);
-//     arp_req->hardware_len = MAC_LENGTH;
-//     arp_req->protocol_len = IPV4_LENGTH;
-//     arp_req->opcode = htons(ARP_REQUEST);
-
-//     debug("Copy IP address to arp_req");
-//     memcpy(arp_req->sender_ip, &src_ip, sizeof(uint32_t));
-//     memcpy(arp_req->target_ip, &dst_ip, sizeof(uint32_t));
-
-//     ret = sendto(fd, buffer, 42, 0, (struct sockaddr *) &socket_address, sizeof(socket_address));
-//     if (ret == -1) {
-//         perror("sendto():");
-//         goto out;
-//     }
-//     err = 0;
-// out:
-//     return err;
-// }
