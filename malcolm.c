@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     int index_interface;
     bool arprequest = false;
     
+    printf("size of structure: %lu\n", sizeof(struct arp_header));
     // SOCK_RAW for direct packet manipulation
     sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if(sockfd < 0)
@@ -29,7 +30,7 @@ int main(int argc, char *argv[])
 
     //fill the address source and target
     fill_addr(&srcaddr, argv[1]);
-    fill_addr(&targetaddr, argv[2]);
+    fill_addr(&targetaddr, argv[3]);
 
     // retrieve my local network address into a link list
     if(getifaddrs(&ifaddr) == -1)
@@ -110,6 +111,8 @@ int main(int argc, char *argv[])
                     eth->h_dest[3] == 0xFF && eth->h_dest[4] == 0xFF && eth->h_dest[5] == 0xFF && !arprequest)
                 {
                     printf("size: %ld\n", packet_len);
+                    printf("type of hardware type: %d \n", arp.hardware_type);
+                    printf("type of protocol type: %d \n", arp.protocol_type);
                     arprequest = true;
                     // print_buffer((unsigned char *)buffer, sizeof(packet_len));
                     for(int i = 0; i < packet_len ; i++)
