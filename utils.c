@@ -11,7 +11,7 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
     //convert my input ip address ip to binary 
     if(!(rval = inet_pton(AF_INET, addr, &inAddress->sin_addr.s_addr)))
     {
-        printf("invalide IP address: %s\n", addr);
+        printf("Invalid IP address: %s\n", addr);
         return(1);
     }
     else if(rval == -1)
@@ -84,10 +84,7 @@ bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
 
     //fill the ip address and mac address from arguments
     if(fill_addr(&malcolm->srcaddr, argv[1]) || fill_addr(&malcolm->targetaddr, argv[3]))
-    {
-        printf("Invalid IP address format.\n");
         return(false);
-    }
     return true;
 }
 
