@@ -44,8 +44,9 @@ int main(int argc, char *argv[])
             //create an arp_header skipping the ethernet header
             struct  arp_header *arp = (struct arp_header *)(buffer + sizeof(struct ethhdr));
             unsigned int uintsrc, uinttarg;
-            ft_memcpy(&uinttarg, arp->target_ip, 4);
+            ft_memcpy(&uintsrc, arp->target_ip, 4);
             ft_memcpy(&uintsrc, arp->sender_ip, 4);
+            ft_memcpy(&uinttarg, arp->target_ip, 4);
 
             printf("Received ARP packet of size %ld: SRC IP %d.%d.%d.%d -> TARG IP %d.%d.%d.%d\n",
                 packet_len, arp->sender_ip[0], arp->sender_ip[1], arp->sender_ip[2], arp->sender_ip[3],
