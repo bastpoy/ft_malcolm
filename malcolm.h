@@ -35,10 +35,25 @@ struct arp_header {
     unsigned char target_ip[4]; // 4 bytes ip adress
 }; // 28 bytes
 
+struct Malcolm{
+    struct sockaddr_in srcaddr;
+    struct sockaddr_in targetaddr;
+    struct sockaddr_in *interfaceIp;
+    struct sockaddr_ll *interfaceMac;
+    struct ifaddrs *ifaddr;
+    int index_interface;
+};
+
 // sizeof ethhdr 14 bytes => total 42 bytes
 
 int fill_addr(struct sockaddr_in *targetaddr, char *addr);
 void print_uchar(unsigned char *array);
 void print_mac(unsigned char *mac);
+int fill_mac(const char *mac_str, char src_mac[6]);
+int fill_sockaddr_ll(struct sockaddr_ll *sll, int if_index, unsigned char *mac_addr);
+bool get_interface(struct Malcolm *malcolm);
+bool verify_mac(unsigned char *mac1, unsigned char *mac2);
+bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm);
+unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, struct arp_header *arp);
 
 #endif
