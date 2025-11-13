@@ -23,24 +23,6 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
     return(0);
 }
 
-int fill_mac(const char *mac_str, char src_mac[6]){
-    int values[6];
-    if( 6 == sscanf(mac_str, "%x:%x:%x:%x:%x:%x%*c",
-        &values[0], &values[1], &values[2],
-        &values[3], &values[4], &values[5]) )
-    {
-        // convert to uint8_t
-        for( int i = 0; i < 6; ++i )
-            src_mac[i] = (char) values[i];
-        return 0;
-    }
-    else
-    {
-        printf("Invalid MAC address format: %s\n", mac_str);
-        return 1;
-    }
-}
-
 int fill_sockaddr_ll(struct sockaddr_ll *sll, int if_index, unsigned char *mac_addr) {
     ft_memset(sll, 0, sizeof(struct sockaddr_ll));
     sll->sll_family = AF_PACKET;
@@ -175,8 +157,9 @@ unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, s
     arpsend->hardware_len = 6; // mac length
     arpsend->protocol_len = 4; // ip length
     arpsend->opcode = htons(0x02); // response ARP
+
     ft_memcpy(arpsend->sender_mac, malcolm.interfaceMac->sll_addr, ETH_ALEN); // fill with my MAC
-    ft_memcpy(arpsend->sender_ip, &malcolm.targetaddr.sin_addr.s_addr, 4); // fill with initial target IP
+    ft_memcpy(arpsend->sender_ip, &malcolm.srcaddr.sin_addr.s_addr, 4); // fill with initial target IP
     ft_memcpy(arpsend->target_mac, arp->sender_mac, ETH_ALEN); // SRC MAC
     ft_memcpy(arpsend->target_ip, arp->sender_ip, 4); // SRC IP
     return buffersend;
