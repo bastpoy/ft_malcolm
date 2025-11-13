@@ -22,6 +22,7 @@ clean :
 	rm -rf objects
 
 fclean : clean
+	$(MAKE) fclean -C ./libft
 	rm -f $(NAME)
 
 re : fclean all
