@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -g3 -Ilibft
 NAME = ft_malcolm
 
 $(NAME) : libft/libft.a $(OBJSPRINTF)
-	gcc $(CFLAGS) -o $(NAME) $(OBJSPRINTF) ./libft/libft.a -lX11 -lXext -lm
+	gcc $(CFLAGS) -o $(NAME) $(OBJSPRINTF) ./libft/libft.a
 
 all : $(NAME)
 
