@@ -164,3 +164,53 @@ unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, s
     ft_memcpy(arpsend->target_ip, arp->sender_ip, 4); // SRC IP
     return buffersend;
 }
+
+int setup_bpf_filter(int sockfd) {
+    // BPF filter to only accept ARP packets (Ethertype 0x0806)
+    // This significantly reduces overhead by filtering at kernel level
+    struct sock_filter bpf_code[] = {
+        // Load ethertype (2 bytes at offset 12 in ethernet header)
+        { 0x28, 0, 0, 0x0000000c },  // ldh [12]
+        // Jump if equal to 0x0806 (ARP)
+        { 0x15, 0, 1, 0x00000806 },  // jeq #0x806, L1, L2
+        // L1: Accept packet
+        { 0x6, 0, 0, 0x00040000 },   // ret #262144
+        // L2: Reject packet
+        { 0x6, 0, 0, 0x00000000 },   // ret #0
+    };
+    
+    struct sock_fprog bpf = {
+        .len = sizeof(bpf_code) / sizeof(bpf_code[0]),
+        .filter = bpf_code,
+    };
+    
+    if (setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_FILTER, &bpf, sizeof(bpf)) < 0) {
+        perror("setsockopt SO_ATTACH_FILTER");
+        return -1;
+    }
+    
+    return 0;
+}
+
+int optimize_socket(int sockfd) {
+    // Set socket to high priority for faster processing
+    int priority = 7;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_PRIORITY, &priority, sizeof(priority)) < 0) {
+        perror("setsockopt SO_PRIORITY");
+        return -1;
+    }
+    
+    // Increase socket buffer sizes for better performance
+    int bufsize = 65536;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) < 0) {
+        perror("setsockopt SO_RCVBUF");
+        return -1;
+    }
+    
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) < 0) {
+        perror("setsockopt SO_SNDBUF");
+        return -1;
+    }
+    
+    return 0;
+}

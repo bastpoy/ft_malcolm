@@ -1,0 +1,14 @@
+# Build artifacts
+*.o
+*.a
+ft_malcolm
+objects/
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store

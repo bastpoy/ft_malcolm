@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
+#include <linux/filter.h>
 #include <stdbool.h>
 // #include <linux/if_arp.h>
 
@@ -54,5 +55,7 @@ bool get_interface(struct Malcolm *malcolm);
 bool verify_mac(unsigned char *mac1, unsigned char *mac2);
 bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm);
 unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, struct arp_header *arp);
+int setup_bpf_filter(int sockfd);
+int optimize_socket(int sockfd);
 
 #endif
