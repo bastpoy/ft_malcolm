@@ -40,6 +40,8 @@ struct Malcolm{
     struct sockaddr_in targetaddr;
     struct sockaddr_in *interfaceIp;
     struct sockaddr_ll *interfaceMac;
+    unsigned char targetMac[6];
+    unsigned char sourceMac[6];
     struct ifaddrs *ifaddr;
     int index_interface;
 };
@@ -53,6 +55,6 @@ int fill_sockaddr_ll(struct sockaddr_ll *sll, int if_index, unsigned char *mac_a
 bool get_interface(struct Malcolm *malcolm);
 bool verify_mac(unsigned char *mac1, unsigned char *mac2);
 bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm);
-unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, struct arp_header *arp);
+unsigned char *create_arp_response(struct Malcolm malcolm);
 
 #endif

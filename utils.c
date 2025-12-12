@@ -50,6 +50,38 @@ bool verify_mac(unsigned char *mac1, unsigned char *mac2){
     return true;
 }
 
+// Helper function to convert a hex character to its numeric value
+int hex_char_to_int(char c) {
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+    return -1;  // Invalid character
+}
+
+// Convert MAC address string to unsigned char array
+int mac_string_to_bytes(const char *mac_str, unsigned char mac[6]) {
+    int i = 0;
+    int byte_index = 0;
+    
+    while (mac_str[i] != '\0' && byte_index < 6) {
+        int high = hex_char_to_int(mac_str[i]);
+        int low = hex_char_to_int(mac_str[i + 1]);
+        
+        if (high == -1 || low == -1)
+            return -1;  // Invalid character
+        
+        mac[byte_index] = (high << 4) | low;
+        byte_index++;
+        
+        i += 3;  // Skip 2 hex chars + 1 colon
+    }
+    
+    return (byte_index == 6) ? 0 : -1;  // Success if exactly 6 bytes
+}
+
 bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
     //verify arguments
     if(argc != 5)
@@ -67,6 +99,15 @@ bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
     //fill the ip address and mac address from arguments
     if(fill_addr(&malcolm->srcaddr, argv[1]) || fill_addr(&malcolm->targetaddr, argv[3]))
         return(false);
+    
+    if(mac_string_to_bytes(argv[2], malcolm->sourceMac) != 0) {
+        printf("Invalid source MAC address format.\n");
+        return false;
+    }
+    if(mac_string_to_bytes(argv[4], malcolm->targetMac) != 0) {
+        printf("Invalid target MAC address format.\n");
+        return false;
+    }
     return true;
 }
 
@@ -133,7 +174,7 @@ bool get_interface(struct Malcolm *malcolm){
     return false;
 }
 
-unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, struct arp_header *arp){
+unsigned char *create_arp_response(struct Malcolm malcolm){
     unsigned char *buffersend = malloc(42);
     if (!buffersend) {
         perror("malloc");
@@ -148,8 +189,8 @@ unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, s
 
     //eth header
     ethsend->h_proto = htons(ETH_P_ARP); // PROTOCOLE ARP
-    ft_memcpy(ethsend->h_dest, eth->h_source, ETH_ALEN); // MAC dest which is the mac src of the previous request
-    ft_memcpy(ethsend->h_source, malcolm.interfaceMac->sll_addr, ETH_ALEN); // MAC source which is my MAC address
+    ft_memcpy(ethsend->h_dest, malcolm.targetMac, ETH_ALEN); // MAC dest which is the mac src of the previous request
+    ft_memcpy(ethsend->h_source, malcolm.sourceMac, ETH_ALEN); // MAC source which is my MAC address
 
     //arp header
     arpsend->hardware_type = htons(1); // ethernet
@@ -158,9 +199,15 @@ unsigned char *create_arp_response(struct Malcolm malcolm, struct ethhdr *eth, s
     arpsend->protocol_len = 4; // ip length
     arpsend->opcode = htons(0x02); // response ARP
 
-    ft_memcpy(arpsend->sender_mac, malcolm.interfaceMac->sll_addr, ETH_ALEN); // fill with my MAC
+    ft_memcpy(arpsend->sender_mac, malcolm.sourceMac, ETH_ALEN); // fill with my MAC
     ft_memcpy(arpsend->sender_ip, &malcolm.srcaddr.sin_addr.s_addr, 4); // fill with initial target IP
-    ft_memcpy(arpsend->target_mac, arp->sender_mac, ETH_ALEN); // SRC MAC
-    ft_memcpy(arpsend->target_ip, arp->sender_ip, 4); // SRC IP
+    ft_memcpy(arpsend->target_mac, malcolm.targetMac, ETH_ALEN); // SRC MAC
+    ft_memcpy(arpsend->target_ip, &malcolm.targetaddr.sin_addr.s_addr, 4); // SRC IP
+    
+    printf("Sender MAC: ");
+    print_mac(arpsend->sender_mac);
+    printf("target MAC: ");
+    print_mac(arpsend->target_mac);
+    
     return buffersend;
 }
