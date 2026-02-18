@@ -8,7 +8,7 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
     (*inAddress).sin_port = htons(PORT);
     //fill type of address
     (*inAddress).sin_family = AF_INET;
-    //convert my input ip address ip to binary 
+    //convert my input ip address ip to binary
     if(!(rval = inet_pton(AF_INET, addr, &inAddress->sin_addr.s_addr)))
     {
         printf("Invalid IP address: %s\n", addr);
@@ -19,6 +19,7 @@ int fill_addr(struct sockaddr_in *inAddress, char *addr)
         printf("Error translating target address: %s\n",strerror(errno));
         return(errno);
     }
+    printf("the value of the address is %u and the char is %s\n", ntohl(inAddress->sin_addr.s_addr), addr);
     ft_memset(&(inAddress->sin_zero), '\0', 8);
     return(0);
 }
@@ -83,28 +84,37 @@ int mac_string_to_bytes(const char *mac_str, unsigned char mac[6]) {
 }
 
 bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
+    int have_option = 0;
     //verify arguments
-    if(argc != 5)
+    if(argc != 5 && argc != 6)
     {
         printf("Usage: %s <source IP> <source MAC> <target IP> <target MAC>\n", argv[0]);
         return(false);
     }
+    else if((argc == 6 && strcmp(argv[1], "-v")) && (argc == 6 && strcmp(argv[1], "-d"))){
+        printf("Usage: %s <source IP> <source MAC> <target IP> <target MAC>\n", argv[0]);
+        return(false);
+    }
 
-    if(!verify_mac((unsigned char *)argv[2], (unsigned char *)argv[4]))
+    if(argc == 6){
+        have_option = 1;
+    }
+
+    if(!verify_mac((unsigned char *)argv[2 + have_option], (unsigned char *)argv[4 + have_option]))
     {
         printf("Invalid MAC address format.\n");
         return(false);
     }
 
     //fill the ip address and mac address from arguments
-    if(fill_addr(&malcolm->srcaddr, argv[1]) || fill_addr(&malcolm->targetaddr, argv[3]))
+    if(fill_addr(&malcolm->srcaddr, argv[1 + have_option]) || fill_addr(&malcolm->targetaddr, argv[3 + have_option]))
         return(false);
     
-    if(mac_string_to_bytes(argv[2], malcolm->sourceMac) != 0) {
+    if(mac_string_to_bytes(argv[2 + have_option], malcolm->sourceMac) != 0) {
         printf("Invalid source MAC address format.\n");
         return false;
     }
-    if(mac_string_to_bytes(argv[4], malcolm->targetMac) != 0) {
+    if(mac_string_to_bytes(argv[4 + have_option], malcolm->targetMac) != 0) {
         printf("Invalid target MAC address format.\n");
         return false;
     }

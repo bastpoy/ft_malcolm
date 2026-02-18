@@ -44,6 +44,7 @@ struct Malcolm{
     unsigned char sourceMac[6];
     struct ifaddrs *ifaddr;
     int index_interface;
+    int have_options;
 };
 
 // sizeof ethhdr 14 bytes => total 42 bytes
