@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
     // Pre-create ARP response packet
     unsigned char *buffersend = create_arp_response(malcolm);
     if (!buffersend) {
+        freeifaddrs(malcolm.ifaddr);
+        close(sockfd);
         printf("Error creating ARP response: %s\n", strerror(errno));
         return(1);
     }
@@ -65,11 +67,18 @@ int main(int argc, char *argv[])
                 {
                     //sending response
                     printf("Sent an ARP reply packet, you may now check the arp table on the target.\n");
+                    if(malcolm.verbose_mode){
+                        char buffer[15];
+                        printf("**Packet**");
+                        printf("- Size: %d\n", 42);
+                        printf("- Address source: %s\n", inet_ntop(AF_INET, &malcolm.srcaddr.sin_addr, buffer, 15));
+                        printf("- Address dest: %s\n", inet_ntop(AF_INET, &malcolm.targetaddr.sin_addr, buffer, 15));
+                        
+                    }
                     sleep(1);
                     int size = sendto(sockfd, buffersend, 42, 0, (struct sockaddr *)&address_response, sizeof(address_response));
                     if(size < 0){
                         printf("Error sending packet: %s\n", strerror(errno));
-                        free(buffersend);
                         continue;
                     }
                     else
@@ -86,6 +95,7 @@ int main(int argc, char *argv[])
 	    sleep(0.5);
     }
     close(sockfd);
+    free(buffersend);
     freeifaddrs(malcolm.ifaddr);
     return(1);
 }

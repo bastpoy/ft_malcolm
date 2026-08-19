@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <net/if.h>
 #include <net/ethernet.h>
 #include <netinet/ip.h>
@@ -17,9 +18,6 @@
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
 #include <stdbool.h>
-// #include <linux/if_arp.h>
-
-
 
 #define PORT 219
 
@@ -44,12 +42,15 @@ struct Malcolm{
     unsigned char sourceMac[6];
     struct ifaddrs *ifaddr;
     int index_interface;
+    char destHostname[NI_MAXHOST];
     int have_options;
+    bool verbose_mode;
 };
 
 // sizeof ethhdr 14 bytes => total 42 bytes
 
-int fill_addr(struct sockaddr_in *targetaddr, char *addr);
+int getDestAddr(char *argv, struct sockaddr_in *addrDest, char *buffer);
+int fill_addr(struct sockaddr_in *targetaddr, char *addr, int argc, char *option, bool verbose_mode, struct Malcolm *malcolm);
 void print_uchar(unsigned char *array);
 void print_mac(unsigned char *mac);
 int fill_sockaddr_ll(struct sockaddr_ll *sll, int if_index, unsigned char *mac_addr);

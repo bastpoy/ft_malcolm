@@ -1,23 +1,86 @@
 #include "malcolm.h"
 
-int fill_addr(struct sockaddr_in *inAddress, char *addr)
+int getDestAddr(char *argv, struct sockaddr_in *addrDest, char *buffer){
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    char ipstr[INET_ADDRSTRLEN];
+    char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    int ret = getaddrinfo(argv, NULL, &hints, &result);
+    if(ret != 0){
+        if(ret == -2){
+            printf("ping: %s: Name or service not known\n", argv);
+            freeaddrinfo(result);
+        }
+        else if (ret == -3){
+            printf("ping: %s: Temporary failure in name resolution\n", argv);
+            freeaddrinfo(result);
+        }
+        return 2;
+    }
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        if (rp->ai_family == AF_INET) {
+            struct sockaddr_in *temp = (struct sockaddr_in *)rp->ai_addr;
+            memcpy(addrDest, (struct sockaddr_in *)rp->ai_addr, sizeof(struct sockaddr_in));
+            inet_ntop(rp->ai_family, &(temp->sin_addr), ipstr, sizeof(ipstr));
+            if (getnameinfo((struct sockaddr*)temp, sizeof(struct sockaddr), hbuf, sizeof(hbuf), sbuf,
+                    sizeof(sbuf), NI_NAMEREQD) == 0){
+                    memcpy(buffer, hbuf, sizeof(hbuf));
+            }
+            freeaddrinfo(result);
+            return 0;
+        }
+    }
+    freeaddrinfo(result);
+    printf("ping: %s: Temporary failure in name resolution\n", argv);
+    return 2;
+}
+
+int fill_addr(struct sockaddr_in *inAddress, char *addr, int argc, char *option, bool verbose_mode, struct Malcolm *malcolm)
 {
     int rval = 0;
+    char buffer[33];
+    malcolm->verbose_mode = false;
+    (void)verbose_mode;
 
     //fill port
     (*inAddress).sin_port = htons(PORT);
     //fill type of address
     (*inAddress).sin_family = AF_INET;
     //convert my input ip address ip to binary
-    if(!(rval = inet_pton(AF_INET, addr, &inAddress->sin_addr.s_addr)))
-    {
-        printf("Invalid IP address: %s\n", addr);
-        return(1);
+    if(argc == 6 && !strcmp(option, "-d")){
+        uint32_t number = strtoul(addr, NULL, 10);
+        inAddress->sin_addr.s_addr = htonl(number);
+        printf("IP address: %u\n", inAddress->sin_addr.s_addr);
+        if(!(inet_ntop(AF_INET, &inAddress->sin_addr.s_addr, buffer, 33))){
+            printf("problem converting address to host byte into char %s\n", strerror(errno));
+            return(errno);
+        }
+        printf("buffer is %s\n", buffer);
+        return(0);
     }
-    else if(rval == -1)
+    else if(argc == 6 && !strcmp(option, "-h")){
+        printf("in option hexadecimal\n");
+        if(getDestAddr(addr, inAddress, NULL) != 0){
+            return 1;
+        }
+    }
+    else if(argc == 6 && !strcmp(option, "-v")){
+        printf("je suis en verbose\n");
+        malcolm->verbose_mode = true;
+    }
+    else
     {
-        printf("Error translating target address: %s\n",strerror(errno));
-        return(errno);
+        rval = inet_pton(AF_INET, addr, &inAddress->sin_addr.s_addr);
+        if(rval == -1)
+        {
+            printf("Error translating target address: %s\n",strerror(errno));
+            return(errno);
+        }
     }
     printf("the value of the address is %u and the char is %s\n", ntohl(inAddress->sin_addr.s_addr), addr);
     ft_memset(&(inAddress->sin_zero), '\0', 8);
@@ -91,7 +154,7 @@ bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
         printf("Usage: %s <source IP> <source MAC> <target IP> <target MAC>\n", argv[0]);
         return(false);
     }
-    else if((argc == 6 && strcmp(argv[1], "-v")) && (argc == 6 && strcmp(argv[1], "-d"))){
+    else if((argc == 6 && strcmp(argv[1], "-v")) && (argc == 6 && strcmp(argv[1], "-d")) && (argc == 6 && strcmp(argv[1], "-h"))){
         printf("Usage: %s <source IP> <source MAC> <target IP> <target MAC>\n", argv[0]);
         return(false);
     }
@@ -106,10 +169,13 @@ bool verify_arguments(int argc, char *argv[], struct Malcolm *malcolm){
         return(false);
     }
 
+    printf("verbose mode is %d\n", malcolm->verbose_mode);
     //fill the ip address and mac address from arguments
-    if(fill_addr(&malcolm->srcaddr, argv[1 + have_option]) || fill_addr(&malcolm->targetaddr, argv[3 + have_option]))
+    if(fill_addr(&malcolm->srcaddr, argv[1 + have_option], argc, argv[1], malcolm->verbose_mode, malcolm) || 
+    fill_addr(&malcolm->targetaddr, argv[3 + have_option], argc, argv[1], malcolm->verbose_mode, malcolm)){
         return(false);
-    
+    }
+    printf("verbose mode is %d\n", malcolm->verbose_mode);
     if(mac_string_to_bytes(argv[2 + have_option], malcolm->sourceMac) != 0) {
         printf("Invalid source MAC address format.\n");
         return false;
